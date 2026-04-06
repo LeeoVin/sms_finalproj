@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Supplier Management')</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Color palette */
         :root {
             --red-orange: #E93F0C;
             --dark-brown: #322922;
@@ -17,19 +17,30 @@
             font-family: 'Roboto', sans-serif;
             margin: 0;
             background-color: var(--dark-brown);
-            color: black;
         }
 
-        /* Head bar */
+        /* TOP NAV */
         .head-bar {
             background-color: var(--red-orange);
             color: white;
             padding: 1rem 2rem;
-            font-size: 1.5rem;
-            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Buttons */
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        /* BUTTONS */
         .btn {
             background-color: var(--red-orange);
             color: white;
@@ -37,56 +48,108 @@
             padding: 0.5rem 1rem;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 500;
-            margin-right: 0.5rem;
+            margin: 5px;
         }
 
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Cards */
+        /* CARDS */
         .card {
             background-color: var(--light-yellow);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 1rem;
-            margin: 1rem 0;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.25);
         }
 
         .card-header {
+            background-color: var(--gold-yellow);
+            padding: 0.6rem;
+            border-radius: 6px;
             font-weight: bold;
-            color: var(--gold-yellow);
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.7rem;
+            text-align: center;
         }
 
-        /* Tables */
+        /* TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0.5rem;
         }
 
         th {
             background-color: var(--gold-yellow);
-            color: var(--dark-brown);
             padding: 0.5rem;
             text-align: left;
         }
 
         td {
-            padding: 0.5rem;
+            padding: 0.6rem;
             border-bottom: 1px solid #ccc;
         }
+        /* DASHBOARD CARDS */
+.dashboard-card {
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+/* ICON CIRCLE */
+.icon-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden; 
+    border: 4px solid var(--red-orange);
+    margin: 0 auto 1rem auto;
+}
+
+.dashboard-card:hover .icon-circle {
+    transform: scale(1.1);
+}
+
+.icon-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
     </style>
 </head>
+
 <body>
-    <div class="head-bar">
-        @yield('headbar', 'Supplier Management')
+
+<!-- NAVBAR -->
+<div class="head-bar">
+
+    <div><strong>Sulit Burger Admin</strong></div>
+
+    <div>
+        <a href="{{ route('admin.dashboard') }}" class="nav-link">Dashboard</a>
+       
     </div>
 
-    <div class="container" style="padding: 2rem;">
-        @yield('content')
+    <div>
+       <a href="{{ route('logout') }}" class="nav-link">Logout</a>
     </div>
+
+</div>
+
+<!-- CONTENT -->
+<div style="display:flex; justify-content:center; padding:2rem;">
+    <div style="width:900px;">
+
+        @if(session('success'))
+            <div style="background:#d4edda; padding:10px; margin-bottom:1rem;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @yield('content')
+
+    </div>
+</div>
+
 </body>
 </html>

@@ -4,20 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\Supplier;
-use App\Models\Order;
+
 
 class AdminController extends Controller
 {
-    public function dashboard()
-    {
-        $employeeCount = Employee::count();
-        $supplierCount = Supplier::count();
-        $orderCount = Order::count();
+   public function dashboard()
+{
+    $employees = \App\Models\Employee::all();
+    $suppliers = \App\Models\Supplier::all();
 
-        return view('admin.dashboard', compact(
-            'employeeCount',
-            'supplierCount',
-            'orderCount'
-        ));
-    }
+    return view('admin.dashboard', compact('employees', 'suppliers'));
+}
 }
