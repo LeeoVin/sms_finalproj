@@ -16,4 +16,9 @@ class OrderController extends Controller
         $orders = Order::with(['supplier', 'employee'])->get();
         return view('admin.orders', compact('orders'));
     }
+    public function history() {
+    $orders = Order::where('status', 'approved')->get(); // or whatever logic you want
+    return view('supervisor.history', compact('orders'));
 }
+}
+

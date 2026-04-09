@@ -3,81 +3,67 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Employee;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
-    /**
-     * Display a listing of employees
-     */
     public function index()
     {
-        $employees = Employee::all();
+        $employees = User::where('role', '!=', 'admin')->get();
         return view('admin.employees', compact('employees'));
     }
 
-    /**
-     * Show the form for creating a new employee
-     */
     public function create()
     {
         return view('admin.create_employee');
     }
 
-    /**
-     * Store a newly created employee
-     */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:employees,email',
+            'email' => 'required|email|unique:users,email',
             'role' => 'required|string|max:100',
+            'password' => 'required|string|min:6',
         ]);
 
-        Employee::create([
-            'name' => $request->name,
+        User::create([
+            'username' => $request->name,
             'email' => $request->email,
+            'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
 
-        return redirect()->route('employees.index')->with('success', 'Employee added successfully!');
+        return redirect()->route('admin.employees.index')
+            ->with('success', 'Employee added successfully!');
     }
 
-    /**
-     * Show the form for editing an employee
-     */
-    public function edit(Employee $employee)
+    public function edit(User $employee)
     {
         return view('admin.edit_employee', compact('employee'));
     }
 
-    /**
-     * Update an employee
-     */
-    public function update(Request $request, Employee $employee)
+    public function update(Request $request, User $employee)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'email' => 'required|email|unique:users,email,' . $employee->id,
             'role' => 'required|string|max:100',
         ]);
 
         $employee->update([
-            'name' => $request->name,
+            'username' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
         ]);
 
-        return redirect()->route('employees.index')->with('success', 'Employee updated successfully!');
+        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully!');
     }
 
-    /**
-     * Delete an employee
-     */
-    public function destroy(Employee $employee)
+    public function destroy(User $employee)
     {
         $employee->delete();
-        return redirect()->route('employees.index')->with('success', 'Employee deleted successfully!');
+        return redirect()->route('admin.employees.index')->with('success', 'Employee deleted successfully!');
     }
 }
