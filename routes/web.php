@@ -163,35 +163,45 @@ Route::prefix('manager')
     ->name('manager.')
     ->middleware([CheckLogin::class])
     ->group(function () {
-Route::get('orders/create', [OrderController::class, 'create'])
-    ->name('orders.create');
+
         Route::get('dashboard', [ManagerController::class, 'dashboard'])
-    ->name('dashboard');
+            ->name('dashboard');
 
-        Route::get('suppliers', [SupplierController::class, 'managerIndex'])
-            ->name('suppliers');
+        Route::get('orders/create', [OrderController::class, 'create'])
+            ->name('orders.create');
 
-        /* ===== ORDERS ===== */
+        /* =========================
+           POS (SALES SYSTEM)
+        ========================= */
 
-       // PURCHASE ORDERS (SUPPLIES)
-Route::post(
-    'orders/purchase/store',
-    [OrderController::class, 'storePurchaseOrder']
-)->name('orders.purchase.store');
+        Route::post('pos/store', [OrderController::class, 'storePOS'])
+            ->name('pos.store');
 
-// POS CUSTOMER ORDERS
-Route::post(
-    'orders/pos/store',
-    [OrderController::class, 'storePOS']
-)->name('pos.store');
+        Route::get('menu', [MenuController::class, 'index'])
+            ->name('menu.index');
+
+        /* =========================
+           PURCHASE ORDERS
+        ========================= */
 
         Route::get('orders', [OrderController::class, 'managerOrders'])
             ->name('orders.index');
 
+        Route::post('orders/store', [OrderController::class, 'store'])
+            ->name('orders.store');
+
+        Route::post('orders/purchase/store', [OrderController::class, 'storePurchaseOrder'])
+            ->name('orders.purchase.store');
+
         Route::post('orders/{order}/cancel', [OrderController::class, 'managerCancel'])
             ->name('orders.cancel');
 
-        /* ===== ITEMS ===== */
+        Route::post('orders/{order}/confirm-delivery', [OrderController::class, 'confirmDelivery'])
+            ->name('orders.confirmDelivery');
+
+        /* =========================
+           ITEMS / INVENTORY
+        ========================= */
 
         Route::get('items', [ItemController::class, 'managerIndex'])
             ->name('items.index');
@@ -214,23 +224,10 @@ Route::post(
         Route::post('items/{item}/stock', [ItemController::class, 'updateStock'])
             ->name('items.updateStock');
 
-        Route::post(
-            'adjustment/store',
-            [ItemController::class, 'storeAdjustment']
-        )->name('adjustment.store');
-        Route::get('menu', [MenuController::class, 'index'])
-            ->name('manager.menu.index');
-        Route::post(
-        'orders/{order}/confirm-delivery',
-        [OrderController::class, 'confirmDelivery']
-    )->name('orders.confirmDelivery');
-    Route::post('orders/{order}/confirm-delivery', [OrderController::class, 'confirmDelivery'])
-    ->name('orders.confirmDelivery');
-    Route::post(
-    'pos/store',
-    [OrderController::class, 'storePOS']
-)->name('pos.store');
-Route::post('orders/store', [OrderController::class, 'store'])
-    ->name('orders.store');
+        /* =========================
+           ADJUSTMENTS
+        ========================= */
 
+        Route::post('adjustment/store', [ItemController::class, 'storeAdjustment'])
+            ->name('adjustment.store');
     });
