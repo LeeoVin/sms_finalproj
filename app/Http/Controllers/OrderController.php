@@ -55,12 +55,13 @@ class OrderController extends Controller
 
     try {
 
-        $order = DB::table('sales_receipts')->insertGetId([
-            'branch' => $user->branch,
-            'total' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $order = Order::create([
+    'branch' => $user->branch,
+    'total_price' => 0,
+    'status' => 'pending',
+    'user_id' => $user->id,
+    'type' => 'purchase'
+]);
 
         $total = 0;
 
@@ -188,7 +189,11 @@ public function storePOS(Request $request)
         ]);
 
         // 2. ADD ITEMS TO INVENTORY
-        foreach ($order->items as $item) {
+        $items = DB::table('order_items')
+    ->where('order_id', $order->order_id)
+    ->get();
+
+foreach ($items as $item) {
 
             $stock = BranchStock::where('item_id', $item->item_id)
                 ->where('branch', $order->branch)

@@ -167,9 +167,6 @@ Route::prefix('manager')
         Route::get('dashboard', [ManagerController::class, 'dashboard'])
             ->name('dashboard');
 
-        Route::get('orders/create', [OrderController::class, 'create'])
-            ->name('orders.create');
-
         /* =========================
            POS (SALES SYSTEM)
         ========================= */
@@ -200,7 +197,7 @@ Route::prefix('manager')
             ->name('orders.confirmDelivery');
 
         /* =========================
-           ITEMS / INVENTORY
+           ITEMS
         ========================= */
 
         Route::get('items', [ItemController::class, 'managerIndex'])

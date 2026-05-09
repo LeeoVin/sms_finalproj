@@ -32,14 +32,14 @@ $approvedOrders = Order::where('type', 'purchase')
 
     // ✅ FIXED: USE order_items + items (NOT menu_items)
     $sales = DB::table('sales')
-        ->join('menu_items', 'menu_items.menu_id', '=', 'sales.menu_id')
-        ->selectRaw('
-            MONTH(sales.created_at) as month,
-            menu_items.menu_name as item_name,
-            SUM(sales.quantity) as total_sold
-        ')
-        ->groupBy('month', 'menu_items.menu_id', 'menu_items.menu_name')
-        ->get();
+    ->leftJoin('menu_items', 'menu_items.menu_id', '=', 'sales.menu_id')
+    ->selectRaw('
+        MONTH(sales.created_at) as month,
+        COALESCE(menu_items.menu_name, "Unknown Item") as item_name,
+        SUM(sales.quantity) as total_sold
+    ')
+    ->groupBy('month', 'sales.menu_id', 'menu_items.menu_name')
+    ->get();
 
     $itemNames = $sales->pluck('item_name')->unique();
 
