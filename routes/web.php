@@ -27,7 +27,7 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-Route::post('/login', function (Request $request) {dd(session()->all());
+Route::post('/login', function (Request $request) {
 
     $request->validate([
         'username' => 'required|string',
