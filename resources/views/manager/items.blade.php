@@ -2,7 +2,36 @@
 
 @section('content')
 
-<h2 style="margin-bottom:20px;">Branch Inventory</h2>
+<h2 style="margin-bottom:20px; color:#322922;">
+    Branch Inventory
+</h2>
+
+{{-- ✅ SUCCESS MESSAGE --}}
+@if(session('success'))
+    <div style="
+        background:#d4edda;
+        color:#155724;
+        padding:12px 15px;
+        border-radius:10px;
+        margin-bottom:15px;
+        font-weight:bold;
+    ">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div style="
+        background:#f8d7da;
+        color:#721c24;
+        padding:12px 15px;
+        border-radius:10px;
+        margin-bottom:15px;
+        font-weight:bold;
+    ">
+        {{ session('error') }}
+    </div>
+@endif
 
 {{-- ================= INVENTORY TABLE ================= --}}
 <div style="
@@ -15,11 +44,12 @@
 
 <table style="width:100%; border-collapse:collapse;">
 
+    {{-- HEADER (FIXED VISIBILITY) --}}
     <thead>
-        <tr style="text-align:left; border-bottom:2px solid #eee;">
-            <th style="padding:10px;">Item</th>
-            <th style="padding:10px;">Quantity</th>
-            <th style="padding:10px;">Status</th>
+        <tr style="background:#f4f4f4; text-align:left;">
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Item</th>
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Quantity</th>
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Status</th>
         </tr>
     </thead>
 
@@ -32,14 +62,21 @@
 
             $status =
                 $stock <= 0 ? 'Out of Stock' :
-                ($stock <= 10 ? 'Low' : 'Available');
+                ($stock <= 10 ? 'Low Stock' : 'Available');
         @endphp
 
         <tr style="border-bottom:1px solid #f1f1f1;">
-            <td style="padding:12px;">{{ $item->item_name }}</td>
-            <td style="padding:12px;">{{ $stock }}</td>
 
             <td style="padding:12px;">
+                {{ $item->item_name }}
+            </td>
+
+            <td style="padding:12px;">
+                {{ $stock }}
+            </td>
+
+            <td style="padding:12px;">
+
                 <span style="
                     padding:5px 10px;
                     border-radius:20px;
@@ -48,11 +85,13 @@
                     color:white;
                     background:
                         {{ $status == 'Available' ? '#2ecc71' :
-                           ($status == 'Low' ? '#f39c12' : '#e74c3c') }};
+                           ($status == 'Low Stock' ? '#f39c12' : '#e74c3c') }};
                 ">
                     {{ $status }}
                 </span>
+
             </td>
+
         </tr>
 
     @endforeach
@@ -66,14 +105,16 @@
 <br>
 
 {{-- ================= BUTTON ================= --}}
-<button class="btn-delete"
-        onclick="openDisposeModal()"
+<button onclick="openDisposeModal()"
         style="
             cursor:pointer;
             padding:10px 15px;
             border-radius:8px;
+            background:#322922;
+            color:white;
+            border:none;
         ">
-    Request Rid of Stocks
+    Request Disposal of Stocks
 </button>
 
 {{-- ================= MODAL ================= --}}
@@ -81,88 +122,79 @@
 
     <div class="modal-content">
 
-        <h3 style="margin-bottom:15px;">Request Disposal of Stocks</h3>
+        <h3 style="margin-bottom:15px;">
+            Request Disposal of Stocks
+        </h3>
 
         <form method="POST" action="{{ route('manager.adjustment.store') }}">
-            @csrf
+    @csrf
 
-            {{-- ITEM SELECT --}}
-            <label style="font-weight:bold;">Items</label>
+    <div style="display:flex; flex-direction:column; gap:12px;">
 
-            <select name="item_id"
-                    style="
-                        width:100%;
-                        padding:10px;
-                        margin-top:6px;
-                        border-radius:8px;
-                        border:1px solid #ddd;
-                    ">
-                @foreach($items as $item)
-                    <option value="{{ $item->item_id }}">
-                        {{ $item->item_name }}
-                    </option>
-                @endforeach
-            </select>
+        {{-- ITEM --}}
+        <label style="font-weight:600; font-size:14px; color:#333;">
+            Item
+        </label>
 
-            <br><br>
+        <select name="item_id" class="form-control">
+            @foreach($items as $item)
+                <option value="{{ $item->item_id }}">
+                    {{ $item->item_name }}
+                </option>
+            @endforeach
+        </select>
 
-            {{-- QUANTITY --}}
-            <label style="font-weight:bold;">Quantity to Dispose</label>
+        {{-- QUANTITY --}}
+        <label style="font-weight:600; font-size:14px; color:#333;">
+            Quantity to Dispose
+        </label>
 
-            <input type="number"
-                   name="quantity"
-                   min="1"
-                   required
-                   style="
-                        width:100%;
-                        padding:10px;
-                        margin-top:6px;
-                        border-radius:8px;
-                        border:1px solid #ddd;
-                   ">
+        <input type="number"
+               name="quantity"
+               min="1"
+               required
+               class="form-control">
 
-            <br><br>
+        {{-- REASON --}}
+        <label style="font-weight:600; font-size:14px; color:#333;">
+            Reason
+        </label>
 
-            {{-- REASON --}}
-            <label style="font-weight:bold;">Reason</label>
+        <textarea name="reason"
+                  required
+                  placeholder="e.g. spoiled, expired, damaged"
+                  class="form-control textarea">
+        </textarea>
 
-            <textarea name="reason"
-                      required
-                      placeholder="e.g. spoiled, expired, damaged"
-                      style="
-                          width:100%;
-                          height:90px;
-                          padding:10px;
-                          margin-top:6px;
-                          border-radius:8px;
-                          border:1px solid #ddd;
-                          resize:none;
-                      ">
-            </textarea>
+        {{-- SUBMIT --}}
+        <button class="btn-submit"
+                style="
+                    margin-top:10px;
+                    width:100%;
+                    padding:12px;
+                    border-radius:10px;
+                    background:#69BAB7;
+                    color:white;
+                    border:none;
+                    font-weight:bold;
+                    cursor:pointer;
+                ">
+            Send Request
+        </button>
 
-            <br><br>
-
-            {{-- SUBMIT --}}
-            <button class="btn-submit"
-                    style="
-                        width:100%;
-                        padding:10px;
-                        border-radius:8px;
-                        cursor:pointer;
-                    ">
-                Send Request
-            </button>
-
-        </form>
+    </div>
+</form>
 
         <br>
 
         <button onclick="closeDisposeModal()"
-                class="btn-delete"
                 style="
                     width:100%;
                     padding:10px;
+                    border:none;
                     border-radius:8px;
+                    background:#322922;
+                    color:white;
                     cursor:pointer;
                 ">
             Close
@@ -183,20 +215,42 @@
     height:100%;
     background:rgba(0,0,0,0.5);
     z-index:999;
-
-    /* center fix */
     justify-content:center;
     align-items:center;
 }
 
 .modal-content {
-    background:white;
-    width:90%;
-    max-width:420px;
-    margin:auto;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    background: white;
+    width: 90%;
+    max-width: 420px;
+    margin: auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
+    /* ✅ IMPORTANT FIXES */
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.form-control {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box; /* 🔥 this is the key fix */
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: #69BAB7;
+    box-shadow: 0 0 0 3px rgba(105,186,183,0.2);
+}
+
+.textarea {
+    height: 90px;
+    resize: none;
 }
 </style>
 
@@ -211,10 +265,8 @@ function closeDisposeModal() {
     document.getElementById('disposeModal').style.display = 'none';
 }
 
-// click outside modal to close
 window.onclick = function(event) {
     let modal = document.getElementById('disposeModal');
-
     if (event.target === modal) {
         modal.style.display = "none";
     }

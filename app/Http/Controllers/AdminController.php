@@ -17,34 +17,28 @@ class AdminController extends Controller
         // ========================
         $totalSuppliers = Supplier::count();
         $totalItems = Item::count();
-        $totalOrders = Order::count();
+        $totalOrders = Order::where('type', 'purchase')->count();
 
-        $pendingOrders = Order::where('status', 'pending')->count();
-        $approvedOrders = Order::where('status', 'approved')->count();
-        $cancelledOrders = Order::where('status', 'cancelled')->count();
+        $pendingOrders = Order::where('type', 'purchase')->where('status', 'pending')->count();
+        $approvedOrders = Order::where('type', 'purchase')->where('status', 'approved')->count();
+        $cancelledOrders = Order::where('type', 'purchase')->where('status', 'cancelled')->count();
 
         // ========================
         // TOTAL SALES (REVENUE)
         // ========================
-        $totalSales = DB::table('order_menu_items')
-            ->join('orders', 'orders.order_id', '=', 'order_menu_items.order_id')
-            ->where('orders.status', 'approved')
-            ->select(DB::raw('SUM(order_menu_items.quantity * order_menu_items.price) as total'))
-            ->value('total') ?? 0;
-
+        $totalSales = DB::table('sales')
+    ->sum('total') ?? 0;
         // ========================
         // MONTHLY SALES (REVENUE)
         // ========================
-        $monthlySales = DB::table('order_menu_items')
-            ->join('orders', 'orders.order_id', '=', 'order_menu_items.order_id')
-            ->where('orders.status', 'approved')
-            ->select(
-                DB::raw('MONTH(orders.created_at) as month'),
-                DB::raw('SUM(order_menu_items.quantity * order_menu_items.price) as total')
-            )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        $monthlySales = DB::table('sales')
+    ->select(
+        DB::raw('MONTH(created_at) as month'),
+        DB::raw('SUM(total) as total')
+    )
+    ->groupBy('month')
+    ->orderBy('month')
+    ->get();
 
         $salesData = array_fill(1, 12, 0);
 

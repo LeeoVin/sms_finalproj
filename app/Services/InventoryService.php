@@ -2,39 +2,37 @@
 
 namespace App\Services;
 
-use App\Models\MenuItem;
 use App\Models\BranchStock;
+use Illuminate\Support\Facades\DB;
 
 class InventoryService
 {
-    public static function deductMenuItem($menuId, $qty, $branch)
+    /**
+     * Deduct SUPPLIES when Purchase Order is made
+     */
+    public static function deductSupply($itemId, $quantity, $branch)
     {
-        $menu = MenuItem::with('supplies')->find($menuId);
+        $stock = BranchStock::where('item_id', $itemId)
+            ->where('branch', $branch)
+            ->first();
 
-        if (!$menu) {
-            throw new \Exception("Menu not found");
+        if (!$stock) {
+            throw new \Exception("No stock record found for this item in branch.");
         }
 
-        foreach ($menu->supplies as $supply) {
-
-            $neededQty = $supply->pivot->quantity_needed * $qty;
-
-            $stock = BranchStock::firstOrCreate(
-                [
-                    'item_id' => $supply->item_id,
-                    'branch' => $branch
-                ],
-                [
-                    'stock' => 0
-                ]
-            );
-
-            if ($stock->stock < $neededQty) {
-                throw new \Exception("Insufficient stock for: " . $supply->item_name);
-            }
-
-            $stock->stock -= $neededQty;
-            $stock->save();
+        if ($stock->stock < $quantity) {
+            throw new \Exception("Not enough stock available.");
         }
+
+        $stock->stock -= $quantity;
+        $stock->save();
+    }
+
+    /**
+     * (Optional later) Deduct MENU ingredients
+     */
+    public static function deductMenuItem($menuId, $quantity, $branch)
+    {
+        // you already used this earlier, leave if needed
     }
 }

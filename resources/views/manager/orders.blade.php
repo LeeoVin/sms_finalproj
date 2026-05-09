@@ -4,31 +4,48 @@
 
 @section('content')
 
-<h2>Orders</h2>
+<h2 style="margin-bottom:20px; color:#322922;">
+    Purchase Orders
+</h2>
 
-<table>
+@if(session('success'))
+    <div style="background:#d4edda; color:#155724; padding:12px; border-radius:10px; margin-bottom:15px;">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div style="background:#f8d7da; color:#721c24; padding:12px; border-radius:10px; margin-bottom:15px;">
+        {{ session('error') }}
+    </div>
+@endif
+
+<table style="width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden;">
+
+    {{-- HEADER (FIXED VISIBILITY) --}}
     <thead>
-        <tr>
-            <th>No.</th>
-            <th>Branch</th>
-            <th>Date</th>
-            <th>Total Price</th>
-            <th>Status</th>
+        <tr style="background:#f4f4f4; color:#322922; text-align:left;">
+            <th style="padding:12px; border-bottom:1px solid #ddd;">No.</th>
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Branch</th>
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Date</th>
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Total Price</th>
+            <th style="padding:12px; border-bottom:1px solid #ddd;">Status</th>
         </tr>
     </thead>
 
     <tbody>
+
     @forelse($orders as $order)
-        <tr onclick="openModal({{ $order->order_id }})" style="cursor:pointer;">
-            <td>{{ $order->order_id }}</td>
+        <tr onclick="openModal({{ $order->order_id }})"
+            style="cursor:pointer; border-bottom:1px solid #eee;">
 
+            <td style="padding:12px;">{{ $order->order_id }}</td>
             <td>{{ $order->user->branch }}</td>
-
             <td>{{ $order->created_at->format('Y-m-d') }}</td>
 
             <td>
                 ₱{{ number_format(
-                    $order->menuItems->sum(function ($i) {
+                    $order->items->sum(function ($i) {
                         return $i->pivot->price * $i->pivot->quantity;
                     }),
                     2
@@ -36,22 +53,31 @@
             </td>
 
             <td>
-                @if($order->status == 'approved')
-                    <span style="color:#3498db;">Approved</span>
-                @elseif($order->status == 'delivered')
-                    <span style="color:green;">Delivered</span>
-                @elseif($order->status == 'cancelled')
-                    <span style="color:red;">Cancelled</span>
-                @else
-                    <span style="color:orange;">Pending</span>
-                @endif
+                <span style="
+                    padding:5px 10px;
+                    border-radius:6px;
+                    font-size:12px;
+                    background:
+                        {{ $order->status === 'approved' ? '#d4edda' :
+                           ($order->status === 'delivered' ? '#cce5ff' :
+                           '#fff3cd') }};
+                    color:#333;
+                    font-weight:bold;
+                ">
+                    {{ ucfirst($order->status) }}
+                </span>
             </td>
+
         </tr>
+
     @empty
         <tr>
-            <td colspan="5" style="text-align:center;">No orders</td>
+            <td colspan="5" style="text-align:center; padding:20px;">
+                No orders found
+            </td>
         </tr>
     @endforelse
+
     </tbody>
 </table>
 
@@ -59,76 +85,89 @@
 @foreach($orders as $order)
 
 <div id="modal-{{ $order->order_id }}" class="modal">
+
     <div class="modal-content">
 
         <h3>Order #{{ $order->order_id }}</h3>
+
         <p><strong>Branch:</strong> {{ $order->user->branch }}</p>
+        <p><strong>Date:</strong> {{ $order->created_at->format('Y-m-d') }}</p>
 
         <hr>
 
-        <h4>Items:</h4>
+        <h4>Items</h4>
 
-        @foreach($order->menuItems as $item)
+        @foreach($order->items as $item)
             <p>
-                {{ $item->menu_name }}
+                {{ $item->item_name }}
                 (x{{ $item->pivot->quantity }})
-                - ₱{{ number_format($item->pivot->price, 2) }}
+                — ₱{{ number_format($item->pivot->price, 2) }}
             </p>
         @endforeach
 
         <hr>
 
-        <h4>
+        <h3>
             Total:
             ₱{{ number_format(
-                $order->menuItems->sum(function ($i) {
+                $order->items->sum(function ($i) {
                     return $i->pivot->price * $i->pivot->quantity;
                 }),
                 2
             ) }}
-        </h4>
+        </h3>
 
-        <br>
+        {{-- CONFIRM DELIVERY --}}
+        @if($order->status === 'approved')
 
-        @if($order->status == 'pending')
-            <form action="{{ route('manager.orders.cancel', $order->order_id) }}" method="POST"
-                  onsubmit="return confirm('Are you sure you want to cancel this order?')">
-                @csrf
-                <button class="btn-delete" style="width:100%;">
-                    Cancel Order
-                </button>
-            </form>
-
-        @elseif($order->status == 'approved')
-
-            <form action="{{ route('manager.orders.confirmDelivery', $order->order_id) }}"
-                  method="POST"
-                  onsubmit="return confirm('Confirm delivery received?')">
+            <form method="POST"
+                  action="{{ route('manager.orders.confirmDelivery', $order->order_id) }}"
+                  onsubmit="return confirm('Confirm delivery? This will update inventory.')">
 
                 @csrf
 
-                <button class="btn-submit" style="width:100%;">
+                <button type="submit" style="
+                    width:100%;
+                    margin-top:15px;
+                    background:#28a745;
+                    color:white;
+                    border:none;
+                    padding:12px;
+                    border-radius:8px;
+                    cursor:pointer;
+                ">
                     Confirm Delivery
                 </button>
 
             </form>
 
-        @elseif($order->status == 'delivered')
+        @elseif($order->status === 'delivered')
 
-            <p style="color:green;">Delivery Received</p>
-
-        @else
-
-            <p style="color:gray;">
-                Order already {{ $order->status }}
-            </p>
+            <div style="
+                margin-top:15px;
+                padding:10px;
+                background:#e6f7e6;
+                color:#2e7d32;
+                border-radius:8px;
+                text-align:center;
+                font-weight:bold;
+            ">
+                ✔ Delivered
+            </div>
 
         @endif
 
-        <br>
-
         <button onclick="closeModal({{ $order->order_id }})"
-                class="btn-submit" style="width:100%;">
+                style="
+                    margin-top:15px;
+                    width:100%;
+                    padding:10px;
+                    border:none;
+                    background:#322922;
+                    color:white;
+                    border-radius:8px;
+                    cursor:pointer;
+                ">
             Close
         </button>
 
@@ -137,7 +176,7 @@
 
 @endforeach
 
-
+{{-- MODAL STYLE --}}
 <style>
 .modal {
     display:none;
@@ -152,7 +191,7 @@
 
 .modal-content {
     background:white;
-    width:400px;
+    width:420px;
     margin:8% auto;
     padding:20px;
     border-radius:12px;

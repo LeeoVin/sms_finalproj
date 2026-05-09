@@ -119,38 +119,40 @@ Route::prefix('supervisor')
     ->middleware([CheckLogin::class, IsSupervisor::class])
     ->group(function () {
 
+        // Dashboard
         Route::get('dashboard', [SupervisorController::class, 'dashboard'])
             ->name('dashboard');
 
-        Route::get('orders', [OrderController::class, 'supervisorOrders'])
+        // ORDERS (FIXED HERE)
+        Route::get('orders', [SupervisorController::class, 'orders'])
             ->name('orders.index');
 
-        Route::get('history', [OrderController::class, 'history'])
+        // OPTIONAL: if you want history separate
+        Route::get('history', [SupervisorController::class, 'history'])
             ->name('history');
 
+        // Suppliers
         Route::get('suppliers', [SupplierController::class, 'supervisorIndex'])
             ->name('suppliers');
 
-        Route::post('orders/{order}/approve', [OrderController::class, 'approve'])
+        // Approve order
+        Route::post('orders/{order}/approve', [SupervisorController::class, 'approveOrder'])
             ->name('orders.approve');
 
-        Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])
+        // Cancel order
+        Route::post('orders/{order}/cancel', [SupervisorController::class, 'cancelOrder'])
             ->name('orders.cancel');
 
-        Route::post(
-            'adjustment/{id}/approve',
-            [SupervisorController::class, 'approveAdjustment']
-        )->name('adjustment.approve');
+        // Adjustments
+        Route::post('adjustment/{id}/approve', [SupervisorController::class, 'approveAdjustment'])
+            ->name('adjustment.approve');
 
-        Route::post(
-            'adjustment/{id}/reject',
-            [SupervisorController::class, 'rejectAdjustment']
-        )->name('adjustment.reject');
-        Route::get(
-            'supplies',
-            [SupervisorController::class, 'supplies']
-        )->name('supplies');
-        
+        Route::post('adjustment/{id}/reject', [SupervisorController::class, 'rejectAdjustment'])
+            ->name('adjustment.reject');
+
+        // Supplies
+        Route::get('supplies', [SupervisorController::class, 'supplies'])
+            ->name('supplies');
     });
 
 /* =====================================
@@ -171,8 +173,17 @@ Route::get('orders/create', [OrderController::class, 'create'])
 
         /* ===== ORDERS ===== */
 
-        Route::post('orders/store', [OrderController::class, 'store'])
-            ->name('orders.store');
+       // PURCHASE ORDERS (SUPPLIES)
+Route::post(
+    'orders/purchase/store',
+    [OrderController::class, 'storePurchaseOrder']
+)->name('orders.purchase.store');
+
+// POS CUSTOMER ORDERS
+Route::post(
+    'orders/pos/store',
+    [OrderController::class, 'storePOS']
+)->name('pos.store');
 
         Route::get('orders', [OrderController::class, 'managerOrders'])
             ->name('orders.index');
@@ -213,5 +224,13 @@ Route::get('orders/create', [OrderController::class, 'create'])
         'orders/{order}/confirm-delivery',
         [OrderController::class, 'confirmDelivery']
     )->name('orders.confirmDelivery');
+    Route::post('orders/{order}/confirm-delivery', [OrderController::class, 'confirmDelivery'])
+    ->name('orders.confirmDelivery');
+    Route::post(
+    'pos/store',
+    [OrderController::class, 'storePOS']
+)->name('pos.store');
+Route::post('orders/store', [OrderController::class, 'store'])
+    ->name('orders.store');
 
     });

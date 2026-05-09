@@ -10,9 +10,9 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'status',
         'branch',
-        'total_price'
+        'total_price',
+        'status'
     ];
 
     public function user()
@@ -20,14 +20,14 @@ class Order extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // ✅ FIXED RELATION: menu_items (NOT items)
-    public function menuItems()
+    // ✅ FIXED: SUPPLIES RELATION (order_items)
+    public function items()
     {
         return $this->belongsToMany(
-            MenuItem::class,
-            'order_menu_items',
+            Item::class,
+            'order_items',
             'order_id',
-            'menu_id'
+            'item_id'
         )->withPivot('quantity', 'price')
          ->withTimestamps();
     }

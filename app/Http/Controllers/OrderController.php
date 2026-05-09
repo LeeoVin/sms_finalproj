@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Order;
-use App\Models\Item; // ✅ SUPPLIES ONLY
+use App\Models\Item;
 use App\Services\InventoryService;
+use App\Models\BranchStock;
 
 class OrderController extends Controller
 {
@@ -15,18 +16,18 @@ class OrderController extends Controller
 
     public function index()
     {
-        $orders = Order::with(['user'])
+        $orders = Order::with(['user', 'items'])
             ->latest()
             ->get();
 
         return view('admin.orders', compact('orders'));
     }
 
-    /* ================= CREATE PURCHASE ORDER (SUPPLIES) ================= */
+    /* ================= CREATE ================= */
 
     public function create()
     {
-        $items = Item::all(); // ✅ ONLY SUPPLIES
+        $items = Item::all();
 
         return view('manager.create_order', compact('items'));
     }
@@ -34,82 +35,129 @@ class OrderController extends Controller
     /* ================= STORE PURCHASE ORDER ================= */
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'items' => 'required|array',
-            'items.*.item_id' => 'required|exists:items,item_id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
+{
+    // 🔥 DEBUG: see EXACT request payload
+    \Log::info('ORDER REQUEST:', $request->all());
 
-        $user = User::find(session('user_id'));
+    $request->validate([
+        'items' => 'required|array|min:1',
+        'items.*.item_id' => 'required|exists:items,item_id',
+        'items.*.quantity' => 'required|integer|min:1',
+    ]);
 
-        if (!$user) {
-            return back()->with('error', 'User not found');
-        }
+    $user = User::find(session('user_id'));
 
-        DB::beginTransaction();
-
-        try {
-
-            $order = Order::create([
-                'user_id' => $user->id,
-                'branch' => $user->branch,
-                'status' => 'pending',
-                'total_price' => 0,
-            ]);
-
-            $total = 0;
-
-            foreach ($request->items as $item) {
-
-                $supply = Item::find($item['item_id']); // ✅ FIXED (was MenuItem)
-
-                if (!$supply) {
-                    throw new \Exception("Supply item not found");
-                }
-
-                $qty = (int) $item['quantity'];
-
-                // optional price (if you want later)
-                $price = $supply->price ?? 0;
-
-                DB::table('order_supply_usage')->insert([
-                    'order_id' => $order->order_id,
-                    'item_id' => $supply->item_id,
-                    'quantity' => $qty,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-                // ✅ THIS IS YOUR INVENTORY UPDATE (SUPPLIES ONLY)
-                InventoryService::deductSupply(
-                    $supply->item_id,
-                    $qty,
-                    $user->branch
-                );
-
-                $total += $qty * $price;
-            }
-
-            $order->update([
-                'total_price' => $total
-            ]);
-
-            DB::commit();
-
-            return redirect()
-                ->route('manager.orders.index')
-                ->with('success', 'Purchase order placed successfully');
-
-        } catch (\Exception $e) {
-
-            DB::rollback();
-
-            return back()->with('error', $e->getMessage());
-        }
+    if (!$user) {
+        return back()->with('error', 'User session missing');
     }
 
-    /* ================= MANAGER VIEW ================= */
+    DB::beginTransaction();
+
+    try {
+
+        $order = DB::table('sales_receipts')->insertGetId([
+            'branch' => $user->branch,
+            'total' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $total = 0;
+
+        foreach ($request->items as $index => $item) {
+
+            // 🔥 DEBUG EACH ITEM
+            \Log::info("ITEM LOOP [$index]:", $item);
+
+            if (!isset($item['item_id']) || !isset($item['quantity'])) {
+                throw new \Exception("Invalid item structure at index $index");
+            }
+
+            $supply = Item::find($item['item_id']);
+
+            if (!$supply) {
+                throw new \Exception("Item not found: " . $item['item_id']);
+            }
+
+            $qty = (int) $item['quantity'];
+            $price = (float) $supply->price;
+
+            // 🔥 INSERT CHECKPOINT
+            DB::table('order_items')->insert([
+                'order_id' => $order->order_id,
+                'item_id' => $supply->item_id,
+                'quantity' => $qty,
+                'price' => $price,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $total += $qty * $price;
+        }
+
+        $order->update([
+            'total_price' => $total
+        ]);
+
+        DB::commit();
+
+        return redirect()
+            ->route('manager.orders.index')
+            ->with('success', 'Order placed successfully');
+
+    } catch (\Exception $e) {
+
+        DB::rollback();
+
+        return back()->with('error', $e->getMessage());
+    }
+}
+public function storePOS(Request $request)
+{
+    $request->validate([
+        'items' => 'required|array|min:1',
+        'items.*.menu_id' => 'required|exists:menu_items,menu_id',
+        'items.*.quantity' => 'required|integer|min:1',
+    ]);
+
+    $user = User::find(session('user_id'));
+
+    if (!$user) {
+        return back()->with('error', 'User session missing');
+    }
+
+    DB::beginTransaction();
+
+    try {
+
+        foreach ($request->items as $item) {
+
+            $menu = \App\Models\MenuItem::findOrFail($item['menu_id']);
+
+            $qty = (int) $item['quantity'];
+            $price = (float) $menu->price;
+
+            \App\Models\Sale::create([
+                'menu_id' => $menu->menu_id,
+                'quantity' => $qty,
+                'price' => $price,
+                'total' => $qty * $price,
+                'branch' => $user->branch,
+            ]);
+        }
+
+        DB::commit();
+
+        return back()->with('success', 'POS recorded to SALES only.');
+
+    } catch (\Exception $e) {
+
+        DB::rollback();
+
+        return back()->with('error', $e->getMessage());
+    }
+}
+    /* ================= MANAGER ORDERS ================= */
 
     public function managerOrders()
     {
@@ -119,56 +167,47 @@ class OrderController extends Controller
             return redirect('/login');
         }
 
-        $orders = Order::with(['user'])
+        $orders = Order::with(['user', 'items'])
             ->where('user_id', $user->id)
             ->latest()
             ->get();
 
         return view('manager.orders', compact('orders'));
     }
-
-    public function managerCancel($id)
-    {
-        $user = User::find(session('user_id'));
-
-        if (!$user) return redirect('/login');
-
-        $order = Order::where('order_id', $id)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$order) return back()->with('error', 'Order not found.');
-
-        if ($order->status !== 'pending') {
-            return back()->with('error', 'Cannot cancel.');
-        }
-
-        $order->update(['status' => 'cancelled']);
-
-        return back()->with('success', 'Order cancelled.');
+    public function confirmDelivery(Order $order)
+{
+    if ($order->status !== 'approved') {
+        return back()->with('error', 'Order is not ready for delivery confirmation.');
     }
 
-    /* ================= SUPERVISOR ================= */
+    DB::transaction(function () use ($order) {
 
-    public function supervisorOrders()
-    {
-        $orders = Order::with(['user'])
-            ->latest()
-            ->get();
-
-        return view('supervisor.orders', compact('orders'));
-    }
-
-    public function approve(Order $order)
-    {
-        if ($order->status !== 'pending') {
-            return back()->with('error', 'Already processed.');
-        }
-
+        // 1. Update order status
         $order->update([
-            'status' => 'approved'
+            'status' => 'delivered'
         ]);
 
-        return back()->with('success', 'Order approved.');
-    }
+        // 2. ADD ITEMS TO INVENTORY
+        foreach ($order->items as $item) {
+
+            $stock = BranchStock::where('item_id', $item->item_id)
+                ->where('branch', $order->branch)
+                ->first();
+
+            if ($stock) {
+                // increase existing stock
+                $stock->increment('stock', $item->pivot->quantity);
+            } else {
+                // create stock record if missing
+                BranchStock::create([
+                    'item_id' => $item->item_id,
+                    'branch' => $order->branch,
+                    'stock' => $item->pivot->quantity
+                ]);
+            }
+        }
+    });
+
+    return back()->with('success', 'Delivery confirmed and inventory updated.');
+}
 }

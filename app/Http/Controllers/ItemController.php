@@ -42,7 +42,7 @@ class ItemController extends Controller
 
     public function index()
     {
-        $items = Item::with('supplier')->oldest()->get();
+        $items = Item::with(['supplier', 'branchStocks'])->oldest()->get();
 
         return view('admin.items', compact('items'));
     }

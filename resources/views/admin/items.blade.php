@@ -39,7 +39,9 @@
             <td>{{ $item->category ?? 'N/A' }}</td>
             <td>₱{{ number_format($item->price ?? 0, 2) }}</td>
 
-            <td>{{ $item->count ?? 0 }}</td>
+            <td>
+                {{ $item->branchStocks->sum('stock') ?? 0 }}
+            </td>
 
             <td>
             <div class="action-buttons">

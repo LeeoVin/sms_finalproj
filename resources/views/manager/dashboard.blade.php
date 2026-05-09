@@ -5,8 +5,21 @@
 @section('content')
 
 <h2 style="margin-bottom:25px; color:#322922;">
-    Point of Sale
+    Menu
 </h2>
+@if(session('success'))
+    <div style="
+        background:#d4edda;
+        color:#155724;
+        padding:14px 18px;
+        border-radius:12px;
+        margin-bottom:20px;
+        border:1px solid #c3e6cb;
+        font-weight:bold;
+    ">
+        {{ session('success') }}
+    </div>
+@endif
 @if ($errors->any())
     <div style="color:red; margin-bottom:15px;">
         <ul>
@@ -16,7 +29,7 @@
         </ul>
     </div>
 @endif
-<form action="{{ route('manager.orders.store') }}" method="POST">
+<form action="{{ route('manager.pos.store') }}" method="POST">
 @csrf
 
 <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:25px; align-items:start;">
@@ -49,34 +62,164 @@
 </div>
 
 {{-- RIGHT SIDE --}}
-<div style="background:white; border-radius:18px; padding:25px;">
+<div style="
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    position:sticky;
+    top:20px;
+">
 
-    <h3>Customer Order</h3>
+    <h3 style="
+        margin-bottom:20px;
+        color:#322922;
+        border-bottom:2px solid #f1f1f1;
+        padding-bottom:10px;
+    ">
+        Customer Order
+    </h3>
 
-    <div style="display:flex; gap:10px; margin-bottom:15px;">
+    {{-- ADD ITEM --}}
+    <div style="
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+        margin-bottom:25px;
+    ">
 
-        <select id="menuSelect">
+        <label style="font-size:14px; color:#666;">
+            Select Menu Item
+        </label>
+
+        <select id="menuSelect" style="
+            padding:12px;
+            border-radius:10px;
+            border:1px solid #ddd;
+            font-size:15px;
+        ">
             @foreach($menus as $menu)
                 <option value="{{ $menu->menu_id }}"
                         data-name="{{ $menu->menu_name }}"
                         data-price="{{ $menu->price }}">
-                    {{ $menu->menu_name }} - ₱{{ $menu->price }}
+                    {{ $menu->menu_name }} - ₱{{ number_format($menu->price, 2) }}
                 </option>
             @endforeach
         </select>
 
-        <input type="number" id="menuQty" value="1" min="1">
+        <label style="font-size:14px; color:#666;">
+            Quantity
+        </label>
 
-        <button type="button" onclick="addMenuItem()">+</button>
+        <div style="display:flex; gap:10px;">
+
+            <input
+                type="number"
+                id="menuQty"
+                value="1"
+                min="1"
+                style="
+                    flex:1;
+                    padding:12px;
+                    border-radius:10px;
+                    border:1px solid #ddd;
+                    font-size:15px;
+                "
+            >
+
+            <button
+                type="button"
+                onclick="addMenuItem()"
+                style="
+                    background:#69BAB7;
+                    color:white;
+                    border:none;
+                    border-radius:10px;
+                    padding:0 20px;
+                    cursor:pointer;
+                    font-weight:bold;
+                    font-size:18px;
+                "
+            >
+                +
+            </button>
+
+        </div>
+
     </div>
 
-    <h4>Order Summary</h4>
-    <div id="orderSummary">No items added.</div>
+    {{-- ORDER SUMMARY --}}
+    <div style="
+        background:#fafafa;
+        border-radius:14px;
+        padding:18px;
+        margin-bottom:20px;
+        border:1px solid #eee;
+    ">
 
-    <h3>Total: ₱<span id="totalPrice">0.00</span></h3>
+        <h4 style="
+            margin-bottom:15px;
+            color:#322922;
+        ">
+            Order Summary
+        </h4>
 
-    <button class="btn-submit" style="width:100%;">Place Order</button>
-</div>
+        <div id="orderSummary" style="
+            min-height:120px;
+        ">
+            <p style="color:#999;">
+                No items added.
+            </p>
+        </div>
+
+    </div>
+
+    {{-- TOTAL --}}
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:20px;
+        padding:15px;
+        background:#FFF7F3;
+        border-radius:12px;
+    ">
+
+        <span style="
+            font-size:18px;
+            font-weight:bold;
+            color:#322922;
+        ">
+            Total
+        </span>
+
+        <span style="
+            font-size:24px;
+            font-weight:bold;
+            color:#E93F0C;
+        ">
+            ₱<span id="totalPrice">0.00</span>
+        </span>
+
+    </div>
+
+    {{-- SUBMIT --}}
+    <button
+        class="btn-submit"
+        style="
+            width:100%;
+            padding:14px;
+            border:none;
+            border-radius:12px;
+            background:#69BAB7;
+            color:white;
+            font-size:16px;
+            font-weight:bold;
+            cursor:pointer;
+        "
+    >
+        Place Order
+    </button>
 
 </div>
 
@@ -100,6 +243,11 @@ function addMenuItem() {
     const price = parseFloat(selected.dataset.price);
     const qty = parseInt(document.getElementById('menuQty').value);
 
+    if (qty <= 0 || isNaN(qty)) {
+        alert('Invalid quantity');
+        return;
+    }
+
     const subtotal = price * qty;
     total += subtotal;
 
@@ -112,18 +260,49 @@ function addMenuItem() {
     }
 
     summary.innerHTML += `
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <div>
-                <strong>${name}</strong><br>
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:12px;
+        background:white;
+        border-radius:10px;
+        margin-bottom:10px;
+        border:1px solid #eee;
+    ">
+
+        <div>
+            <div style="
+                font-weight:bold;
+                color:#322922;
+                margin-bottom:4px;
+            ">
+                ${name}
+            </div>
+
+            <div style="
+                font-size:14px;
+                color:#777;
+            ">
                 Qty: ${qty}
             </div>
-            <div>₱${subtotal.toFixed(2)}</div>
         </div>
+
+        <div style="
+            font-weight:bold;
+            color:#E93F0C;
+        ">
+            ₱${subtotal.toFixed(2)}
+        </div>
+
+    </div>
     `;
 
+    // ✅ IMPORTANT: ADD HIDDEN INPUTS
     const container = document.getElementById('hiddenInputs');
 
     const wrapper = document.createElement('div');
+
     wrapper.innerHTML = `
         <input type="hidden" name="items[${itemIndex}][menu_id]" value="${id}">
         <input type="hidden" name="items[${itemIndex}][quantity]" value="${qty}">
