@@ -2,16 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Supplier extends Model
 {
-    use HasFactory;
+    protected $primaryKey = 'supplier_id';
 
     protected $fillable = [
-        'name',
-        'contact',
-        'status',
+        'supplier_name',
+        'supplier_number',
+        'status'
     ];
+
+    /**
+     * NOTE:
+     * We remove items() relationship because:
+     * - Suppliers should NOT own menu items
+     * - They will instead supply RAW MATERIALS in future phase
+     */
+
+    // Future use:
+    // public function supplies()
+    // {
+    //     return $this->hasMany(Supply::class);
+    // }
 }

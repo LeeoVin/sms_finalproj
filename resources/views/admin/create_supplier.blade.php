@@ -4,33 +4,32 @@
 
 @section('content')
 
-<div class="card" style="max-width:500px; margin:auto;">
+<div class="form-container">
 
-    <h2 style="margin-bottom:20px;">Add Supplier</h2>
+    <h2 class="page-title">Add Supplier</h2>
 
-    <form action="{{ route('admin.suppliers.store') }}" method="POST">
+    <form method="POST" action="{{ route('admin.suppliers.store') }}">
         @csrf
 
-        <div style="margin-bottom:15px;">
-            <label>Name</label>
-            <input type="text" name="name" required style="width:100%;">
+        <div class="form-group">
+            <label>Supplier Name</label>
+            <input type="text" name="supplier_name" required>
         </div>
 
-        <div style="margin-bottom:15px;">
-            <label>Contact</label>
-            <input type="text" name="contact" required style="width:100%;">
+        <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" name="supplier_number" required>
         </div>
 
-        <div style="margin-bottom:20px;">
+        <div class="form-group">
             <label>Status</label>
-            <select name="status" style="width:100%;">
+            <select name="status">
                 <option value="In Stock">In Stock</option>
                 <option value="Out of Stock">Out of Stock</option>
             </select>
         </div>
 
-        <button class="btn" style="width:100%;">Save Supplier</button>
-
+        <button class="btn-submit full-width">Save Supplier</button>
     </form>
 
 </div>

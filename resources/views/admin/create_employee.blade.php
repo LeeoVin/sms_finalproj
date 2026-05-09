@@ -4,38 +4,42 @@
 
 @section('content')
 
-<div class="card" style="max-width:500px; margin:auto;">
+<div class="form-container">
 
-    <h2 style="margin-bottom:20px;">Add Employee</h2>
+    <h2 class="page-title">Add Employee</h2>
 
     <form method="POST" action="{{ route('admin.employees.store') }}">
         @csrf
 
-        <div style="margin-bottom:15px;">
+        <div class="form-group">
             <label>Name</label>
-            <input type="text" name="name" required style="width:100%;">
+            <input type="text" name="name" required>
         </div>
 
-        <div style="margin-bottom:15px;">
+        <div class="form-group">
             <label>Email</label>
-            <input type="email" name="email" required style="width:100%;">
+            <input type="email" name="email" required>
         </div>
 
-        <div style="margin-bottom:15px;">
+        <div class="form-group">
             <label>Role</label>
-            <select name="role" style="width:100%;">
+            <select name="role">
                 <option value="store_manager">Store Manager</option>
                 <option value="supervisor">Supervisor</option>
             </select>
         </div>
 
-        <div style="margin-bottom:20px;">
-            <label>Password</label>
-            <input type="password" name="password" required style="width:100%;">
+        <div class="form-group">
+            <label>Branch</label>
+            <input type="text" name="branch" required>
         </div>
 
-        <button type="submit" class="btn" style="width:100%;">Save Employee</button>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
 
+        <button class="btn-submit full-width">Save Employee</button>
     </form>
 
 </div>

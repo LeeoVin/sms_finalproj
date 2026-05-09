@@ -2,86 +2,88 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Supplier;
 use Illuminate\Http\Request;
-use App\Models\Supplier; // Make sure you have a Supplier model
 
 class SupplierController extends Controller
 {
-    /**
-     * Display a listing of suppliers
-     */
+    /* ================= ADMIN ================= */
+
     public function index()
     {
-        $suppliers = Supplier::all(); // Fetch all suppliers
+        $suppliers = Supplier::all();
         return view('admin.suppliers', compact('suppliers'));
     }
 
-    /**
-     * Show the form for creating a new supplier
-     */
     public function create()
-    {
-        return view('admin.create_supplier');
-    }
+{
+    return view('admin.create_supplier');
+}
 
-    /**
-     * Store a newly created supplier in storage
-     */
     public function store(Request $request)
     {
-        // Validate input
         $request->validate([
-            'name' => 'required|string|max:255',
-            'contact' => 'required|string|max:255',
-            'status' => 'required|in:In Stock,Out of Stock',
+            'supplier_name' => 'required|string|max:255',
+            'supplier_number' => 'required|string|max:50',
+            'status' => 'required|string'
         ]);
 
-        // Create supplier
         Supplier::create([
-            'name' => $request->name,
-            'contact' => $request->contact,
+            'supplier_name' => $request->supplier_name,
+            'supplier_number' => $request->supplier_number,
             'status' => $request->status,
         ]);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier added successfully!');
+        return redirect()->route('admin.suppliers.index')
+            ->with('success', 'Supplier added successfully.');
     }
 
-    /**
-     * Show the form for editing the specified supplier
-     */
-    public function edit(Supplier $supplier)
+    public function edit($id)
     {
+        $supplier = Supplier::findOrFail($id);
         return view('admin.edit_supplier', compact('supplier'));
     }
 
-    /**
-     * Update the specified supplier in storage
-     */
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, $id)
     {
-        // Validate input
         $request->validate([
-            'name' => 'required|string|max:255',
-            'contact' => 'required|string|max:255',
-            'status' => 'required|in:In Stock,Out of Stock',
+            'supplier_name' => 'required|string|max:255',
+            'supplier_number' => 'required|string|max:50',
+            'status' => 'required|string|max:50',
         ]);
 
-        // Update supplier
+        $supplier = Supplier::findOrFail($id);
+
         $supplier->update([
-            'name' => $request->name,
-            'contact' => $request->contact,
+            'supplier_name' => $request->supplier_name,
+            'supplier_number' => $request->supplier_number,
             'status' => $request->status,
         ]);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully!');
+        return redirect()->route('admin.suppliers.index')
+            ->with('success', 'Supplier updated successfully.');
     }
 
-    /**
-     * Remove the specified supplier from storage
-     */
-    public function destroy(Supplier $supplier)
+    public function destroy($id)
     {
-        $supplier->delete();
-        return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully!');
+        Supplier::findOrFail($id)->delete();
+
+        return back()->with('success', 'Supplier deleted successfully.');
+    }
+
+    /* ================= SUPERVISOR ================= */
+
+    public function supervisorIndex()
+    {
+        $suppliers = Supplier::all();
+        return view('supervisor.suppliers', compact('suppliers'));
+    }
+
+    /* ================= MANAGER ================= */
+
+    public function managerIndex()
+    {
+        $suppliers = Supplier::all();
+        return view('manager.suppliers', compact('suppliers'));
     }
 }

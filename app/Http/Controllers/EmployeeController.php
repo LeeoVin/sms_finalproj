@@ -26,6 +26,7 @@ class EmployeeController extends Controller
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string|max:100',
             'password' => 'required|string|min:6',
+            'branch' => 'required|string|max:255',
         ]);
 
         User::create([
@@ -33,6 +34,7 @@ class EmployeeController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'branch' => $request->branch,
         ]);
 
         return redirect()->route('admin.employees.index')
@@ -50,20 +52,24 @@ class EmployeeController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $employee->id,
             'role' => 'required|string|max:100',
+            'branch' => 'required|string|max:255',
         ]);
 
         $employee->update([
             'username' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'branch' => $request->branch,
         ]);
 
-        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully!');
+        return redirect()->route('admin.employees.index')
+            ->with('success', 'Employee updated successfully!');
     }
 
     public function destroy(User $employee)
     {
         $employee->delete();
-        return redirect()->route('admin.employees.index')->with('success', 'Employee deleted successfully!');
+        return redirect()->route('admin.employees.index')
+            ->with('success', 'Employee deleted successfully!');
     }
 }

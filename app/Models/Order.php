@@ -2,27 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    use HasFactory;
+    protected $primaryKey = 'order_id';
 
     protected $fillable = [
-        'supplier_id',
-        'employee_id',
+        'user_id',
         'status',
+        'branch',
+        'total_price'
     ];
 
-    // Relationships
-    public function supplier()
+    public function user()
     {
-        return $this->belongsTo(Supplier::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function employee()
+    // ✅ FIXED RELATION: menu_items (NOT items)
+    public function menuItems()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsToMany(
+            MenuItem::class,
+            'order_menu_items',
+            'order_id',
+            'menu_id'
+        )->withPivot('quantity', 'price')
+         ->withTimestamps();
     }
 }

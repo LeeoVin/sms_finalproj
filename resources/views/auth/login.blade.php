@@ -1,102 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background: #f5f7fa;
-            margin: 0;
+            background-color: #ffffff;
         }
 
-        .card {
-            width: 320px;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px;
             text-align: center;
+            position: relative;
         }
 
-        h2 {
-            margin-bottom: 1.5rem;
+        .logo-container {
+            width: 200px;
+            height: 200px; 
+            margin: 0 auto;
+            position: relative;
+            z-index: 10; 
+            
+            background-color: #ffffff;
+            border-radius: 50%;
+            border: 2px solid #FAAA15;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); 
+            
+            overflow: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        input {
+        .logo-container img {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            outline: none;
+            height: 100%;
+            object-fit: cover; 
+            border-radius: 50%; 
         }
 
-        input:focus {
-            border-color: #E93F0C;
+        .form-card {
+            background-color: #ffffff; 
+            padding: 100px 40px 60px 40px; 
+            margin-top: -75px; 
+            border-radius: 20px;
+            
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+            border: 1px solid rgba(0, 0, 0, 0.05); 
+            position: relative;
+            z-index: 5; 
         }
 
-        .btn {
-            width: 100%;
-            padding: 10px;
-            background: #E93F0C;
-            color: white;
+        .form-card h2 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #322922; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #322922; 
+            margin-bottom: 30px;
+            padding: 8px 0;
+            transition: all 0.3s;
+        }
+
+        .input-group:focus-within {
+            border-bottom-color: #E93F0C;
+        }
+
+        .input-group i {
+            width: 30px;
+            font-size: 18px;
+            color: #322922;
+        }
+
+        .input-group input {
+            background: transparent;
             border: none;
-            border-radius: 8px;
+            outline: none;
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 16px;
+            color: #322922;
+        }
+
+        .btn-sign-in {
+            background-color: #E93F0C; 
+            color: #ffffff;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px; 
             cursor: pointer;
-            transition: 0.2s;
+            transition: background-color 0.3s, transform 0.2s;
+            text-transform: uppercase;
+            margin-top: 15px;
+            box-shadow: 0 4px 12px rgba(233, 63, 12, 0.2); 
         }
 
-        .btn:hover {
-            opacity: 0.9;
+        .btn-sign-in:hover {
+            background-color: #322922; 
+            transform: translateY(-2px);
         }
 
-        .error {
-            color: red;
-            margin-bottom: 10px;
+        .error-alert {
+            color: #E93F0C;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: 500;
         }
     </style>
 </head>
-
 <body>
 
-<div class="card" style="text-align:center; width:250px; padding:2rem; margin:auto;">
-    <!-- Circular burger icon -->
-    <div style="
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background-color: #E93F0C;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 0 auto 1rem auto;
-        font-size: 2.5rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    ">
-        🍔
+<div class="login-wrapper">
+    <div class="logo-container">
+        <img src="{{ asset('images/logo.png') }}" alt="Logo">
     </div>
 
-    <!-- App Name -->
-    <h2 style="margin:0;">Sulit</h2>
-    <h2 style="margin:0 0 1rem 0;">Burger</h2>
+    <div class="form-card">
+        <h2>Login</h2>
 
-    <!-- Login heading -->
-    <h3 style="margin-bottom:1rem;">Login</h3>
+        @if(session('error'))
+            <div class="error-alert">
+                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+            </div>
+        @endif
 
-    <!-- Login Form -->
-    <form method="POST" action="/login">
-        @csrf
-        <input type="text" name="username" placeholder="Username" required style="width:100%; margin-bottom:10px; padding:0.5rem; border-radius:5px; border:1px solid #ccc;">
-        <input type="password" name="password" placeholder="Password" required style="width:100%; margin-bottom:10px; padding:0.5rem; border-radius:5px; border:1px solid #ccc;">
-        <button type="submit" style="background:#E93F0C; color:white; padding:0.5rem 1rem; border:none; border-radius:6px; cursor:pointer; width:100%;">Login</button>
-    </form>
+        <form action="{{ route('login') }}" method="POST">
+            @csrf
+
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" placeholder="Username" required value="{{ old('username') }}">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" placeholder="Email Address" required value="{{ old('email') }}">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+
+            <button type="submit" class="btn-sign-in">Sign In</button>
+        </form>
+    </div>
 </div>
 
 </body>

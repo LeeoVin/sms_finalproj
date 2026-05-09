@@ -2,131 +2,247 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'Supplier Management')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS - Sulit Burger</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
+        .form-container {
+    max-width: 500px;
+    margin: auto;
+}
+
+.page-title {
+    margin-bottom: 20px;
+    color: var(--dark-brown);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--dark-brown);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+.full-width {
+    width: 100%;
+}
         :root {
-            --red-orange: #E93F0C;
             --dark-brown: #322922;
+            --red-orange: #E93F0C;
             --gold-yellow: #FAAA15;
-            --light-yellow: #FFF0CF;
+            --light-yellow: #FBCF72;
+            --bg-gray: #ffffff;
         }
 
-        /* BODY */
         body {
-            font-family: 'Roboto', sans-serif;
             margin: 0;
-            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-gray);
+            display: flex;
         }
 
-        /* NAVBAR */
-        .head-bar {
-            background-color: var(--red-orange);
-            color: white;
-            padding: 1rem 2rem;
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background-color: var(--dark-brown);
+            position: fixed;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        .sidebar-logo-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 3px solid var(--gold-yellow);
+            overflow: hidden;
+            background: white;
+            display: flex;
+            justify-content: center;
             align-items: center;
         }
 
-        .brand {
-            font-size: 1.2rem;
-            font-weight: 700;
+        .sidebar-logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            flex-grow: 1;
+        }
+
+        .nav-links li a {
+            color: var(--light-yellow);
+            text-decoration: none;
             display: flex;
             align-items: center;
+            padding: 15px 25px;
+            transition: 0.3s;
         }
 
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            margin: 0 12px;
-            font-weight: 500;
-            transition: 0.2s;
-        }
-
-        .nav-link:hover {
-            opacity: 0.8;
-        }
-
-        /* CONTAINER */
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 2rem;
-        }
-
-        /* BUTTON */
-        .btn {
+        .nav-links li.active a,
+        .nav-links li a:hover {
             background-color: var(--red-orange);
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
+        }
+
+        .nav-links i {
+            margin-right: 15px;
+            width: 22px;
+            min-width: 22px;
+            text-align: center;
+        }
+
+        .btn-logout-sidebar {
+            background: var(--red-orange);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            text-decoration: none;
+            margin: 20px;
             border-radius: 8px;
+        }
+
+        /* MAIN */
+        .main-wrapper {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+        }
+
+        .content-area {
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .data-card {
+            background: white;
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        /* BUTTONS */
+        .btn-add, .btn-submit {
+            background: var(--red-orange);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
+        .btn-edit {
+    background: var(--gold-yellow);
+    color: var(--dark-brown);
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
 
-        /* CARD */
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            margin-bottom: 1.5rem;
-        }
-
-        /* TABLE */
+.btn-delete {
+    background: var(--dark-brown);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed; /* ✅ FIX ALIGNMENT */
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: middle;
         }
 
         th {
-            background-color: #f1f1f1;
-            padding: 0.7rem;
-            text-align: left;
+            border-bottom: 2px solid #eee;
+            color: var(--dark-brown);
         }
 
+        /* Prevent text overflow */
         td {
-            padding: 0.7rem;
-            border-bottom: 1px solid #eee;
+            word-wrap: break-word;
         }
 
-        /* DASHBOARD CARDS */
+        /* ACTION BUTTON GROUP */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+        .action-buttons form {
+            margin: 0;
+        }
+
+        /* DASHBOARD */
+        .dashboard-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
         .dashboard-card {
-            width: 200px;
+            width: 180px;
             text-align: center;
             cursor: pointer;
+            padding: 20px;
+            border-radius: 15px;
             transition: 0.3s;
         }
 
         .dashboard-card:hover {
-            transform: translateY(-6px);
+            background: #fdf2f0;
+            transform: translateY(-5px);
         }
 
-        /* ICON */
         .icon-circle {
             width: 90px;
             height: 90px;
             border-radius: 50%;
             overflow: hidden;
             border: 3px solid var(--red-orange);
-            margin: 0 auto 1rem auto;
-            transition: 0.3s;
-        }
-
-        .dashboard-card:hover .icon-circle {
-            transform: scale(1.1);
+            margin: 0 auto 15px;
         }
 
         .icon-circle img {
@@ -135,99 +251,164 @@
             object-fit: cover;
         }
 
-        /* ALERT */
-        .alert-success {
-            background: #d4edda;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
+        /* GLOBAL MODAL FIX */
+       {{-- GLOBAL MODAL STYLE --}}
 
-        /* SIDEBAR LINKS */
-        .side-link {
-            display:block;
-            color:white;
-            text-decoration:none;
-            margin-bottom:15px;
-            padding:10px;
-            border-radius:6px;
-            transition:0.2s;
-        }
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
 
-        .side-link:hover {
-            background:rgba(255,255,255,0.2);
-        }
+.modal-content {
+    background: #fff;
+    margin: 6% auto;
+    padding: 25px;
+    width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+}
 
-        /* TOP LINKS */
-        .top-link {
-            margin-left:15px;
-            text-decoration:none;
-            color:#333;
-            font-weight:500;
-        }
-
-        .top-link:hover {
-            color:#E93F0C;
-        }
-    </style>
-</head>
+.btn-small {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+.notif-badge {
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 8px;
+    font-size: 12px;
+    margin-left: auto;
+    font-weight: bold;
+}
+</style>
 
 <body>
 
-<div style="display:flex; height:100vh;">
+<div class="sidebar">
 
-    <!-- SIDEBAR -->
-    <div style="
-        width:220px;
-        background:#E93F0C;
-        color:white;
-        padding:20px;
-    ">
-        <h2 style="margin-bottom:30px;">🍔 Sulit Burger</h2>
+    <div class="sidebar-header">
+        <div class="sidebar-logo-circle">
+            <img src="{{ asset('images/logo.png') }}">
+        </div>
+    </div>
+
+    <ul class="nav-links">
 
         @if(session('role') === 'admin')
-            <a href="{{ route('admin.dashboard') }}" class="side-link">Home</a>
-            <a href="{{ route('admin.employees.index') }}" class="side-link">Employees</a>
-            <a href="{{ route('admin.suppliers.index') }}" class="side-link">Suppliers</a>
-            <a href="{{ route('admin.orders.index') }}" class="side-link">Orders</a>
+
+            <li class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
+                <a href="{{ route('admin.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+            </li>
+
+            <li class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
+                <a href="{{ route('admin.menu') }}">
+                    <i class="fas fa-hamburger"></i> Menu
+                </a>
+            </li>
+
+            <li class="{{ request()->is('admin/suppliers*') ? 'active' : '' }}">
+                <a href="{{ route('admin.suppliers.index') }}"><i class="fas fa-truck"></i> Suppliers</a>
+            </li>
+
+            <li class="{{ request()->is('admin/employees*') ? 'active' : '' }}">
+                <a href="{{ route('admin.employees.index') }}"><i class="fas fa-users"></i> Employees</a>
+            </li>
+
+            <li class="{{ request()->is('admin/items*') ? 'active' : '' }}">
+                <a href="{{ route('admin.items.index') }}"><i class="fas fa-box"></i> Supplies</a>
+            </li>
+
+            <li class="{{ request()->is('admin/orders*') ? 'active' : '' }}">
+                <a href="{{ route('admin.orders.index') }}"><i class="fas fa-clock"></i> Order History</a>
+            </li>
 
         @elseif(session('role') === 'supervisor')
-            <a href="{{ route('supervisor.dashboard') }}" class="side-link">Home</a>
-            <a href="{{ route('supervisor.orders.index') }}" class="side-link">Orders</a>
-            <a href="{{ route('supervisor.history') }}" class="side-link">Order History</a>
-            <a href="{{ route('supervisor.suppliers') }}" class="side-link">Suppliers</a>
+                @php
+        $pendingAdjustments = \App\Models\ItemAdjustment::where(
+            'status',
+            'pending'
+        )->count();
+        @endphp
+
+            <li class="{{ request()->is('supervisor/dashboard') ? 'active' : '' }}">
+                <a href="{{ route('supervisor.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+            </li>
+
+            <li class="{{ request()->is('supervisor/orders*') ? 'active' : '' }}">
+                <a href="{{ route('supervisor.orders.index') }}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            </li>
+
+            <li class="{{ request()->is('supervisor/history*') ? 'active' : '' }}">
+                <a href="{{ route('supervisor.history') }}"><i class="fas fa-clock"></i> Order History</a>
+            </li>
+
+            <li class="{{ request()->is('supervisor/suppliers*') ? 'active' : '' }}">
+                <a href="{{ route('supervisor.suppliers') }}"><i class="fas fa-truck"></i> Suppliers</a>
+            </li>
+            <li class="{{ request()->is('supervisor/supplies*') ? 'active' : '' }}">
+
+    <a href="{{ route('supervisor.supplies') }}">
+
+        <i class="fas fa-box"></i>
+
+        Supplies
+
+        @if($pendingAdjustments > 0)
+
+            <span class="notif-badge">
+                {{ $pendingAdjustments }}
+            </span>
+
         @endif
-    </div>
 
-    <!-- MAIN AREA -->
-    <div style="flex:1; display:flex; flex-direction:column;">
+    </a>
 
-        <!-- TOP BAR -->
-        <div style="
-            background:white;
-            padding:15px 25px;
-            display:flex;
-            justify-content:flex-end;
-            box-shadow:0 2px 5px rgba(0,0,0,0.05);
-        ">
-            <a href="{{ route('logout') }}" class="top-link">Logout</a>
-        </div>
+</li>
 
-        <!-- CONTENT -->
-        <div style="padding:25px; background:#f5f7fa; flex:1; overflow:auto;">
+        @elseif(session('role') === 'store_manager')
 
-            @if(session('success'))
-                <div class="alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <li class="{{ request()->is('manager/dashboard') ? 'active' : '' }}">
+                <a href="{{ route('manager.dashboard') }}"><i class="fas fa-home"></i> Menu</a>
+            </li>
 
+            <li class="{{ request()->is('manager/items*') ? 'active' : '' }}">
+                <a href="{{ route('manager.items.index') }}"><i class="fas fa-box"></i> Supplies</a>
+            </li>
+
+            <li class="{{ request()->is('manager/suppliers*') ? 'active' : '' }}">
+                <a href="{{ route('manager.suppliers') }}"><i class="fas fa-truck"></i> Suppliers</a>
+            </li>
+
+            <li class="{{ request()->is('manager/orders/create') ? 'active' : '' }}">
+                <a href="{{ route('manager.orders.create') }}"><i class="fas fa-plus-circle"></i> Purchase Order</a>
+            </li>
+
+            <li class="{{ request()->is('manager/orders') ? 'active' : '' }}">
+                <a href="{{ route('manager.orders.index') }}"><i class="fas fa-shopping-cart"></i> My Orders</a>
+            </li>
+
+        @endif
+
+    </ul>
+
+    <a href="{{ route('logout') }}" class="btn-logout-sidebar">LOGOUT</a>
+</div>
+
+<div class="main-wrapper">
+    <div class="content-area">
+        <div class="data-card">
             @yield('content')
-
         </div>
-
     </div>
-
 </div>
 
 </body>
