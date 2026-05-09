@@ -28,6 +28,11 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::post('/login', function (Request $request) {
+    dd([
+    'env_session_driver' => env('SESSION_DRIVER'),
+    'config_session_driver' => config('session.driver'),
+    'app_env' => env('APP_ENV'),
+]);
 
     $request->validate([
         'username' => 'required|string',
