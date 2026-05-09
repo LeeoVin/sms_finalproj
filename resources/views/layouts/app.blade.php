@@ -289,6 +289,15 @@
     margin-left: auto;
     font-weight: bold;
 }
+function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'block';
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'none';
+}
 </style>
 
 <body>
